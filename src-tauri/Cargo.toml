@@ -1,0 +1,20 @@
+[package]
+name = "supply-chain-app"
+version = "1.0.0"
+description = "Supply Chain desktop application (BOM & Compliance + Sales & Operations)"
+authors = ["Supply Chain Project"]
+edition = "2021"
+
+[lib]
+name = "supply_chain_app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

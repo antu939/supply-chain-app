@@ -1,0 +1,48 @@
+name: Release Desktop App
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  publish-tauri:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            args: ""
+          - platform: windows-latest
+            args: ""
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Stage frontend assets
+        shell: bash
+        run: |
+          rm -rf src-tauri/dist
+          mkdir -p src-tauri/dist
+          cp index.html src-tauri/dist/
+          cp -R app modules shared storage src-tauri/dist/
+          rm -rf src-tauri/dist/modules/*/tests src-tauri/dist/modules/*/types
+
+      - name: Build and release with Tauri
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: "Supply Chain v__VERSION__"
+          releaseBody: "Desktop installers for macOS (.dmg) and Windows (.exe / .msi)."
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}
